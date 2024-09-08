@@ -1,85 +1,24 @@
-import { useState, useEffect } from "react";
+
 import Guitar from "./components/Guitar";
 import Header from "./components/Header";
-import { db } from "./data/db";
+import { useCart } from "./hooks/useCart";  
+
 
 function App() {
-  //aqui declaro los State
+
+   //aqui declaro los State
   // STATE, serecomiendan aqui arriba los hooks
-  //con esto  valida si hay algo en el local storage para mantenerlo y si no deja el estate en vacio
-const initialCart = ()=>{
-  const localStorageCart = localStorage.getItem('cart')
-  return localStorageCart ? JSON.parse(localStorageCart) : []
-}
 
-  const [data] = useState(db);
-  const [cart, setCart] = useState(initialCart);
-
-  const Max_Items = 5;
-  const Min_Items = 1;
-
-  //con esto se ingresa al carrito en el local Storage, con el useefect cada vez que encuentra un cambio lo guarda en el localstorage
-  useEffect(()=>{
-    localStorage.setItem('cart', JSON.stringify(cart) )
-  },[cart])
-
-  //funcion para agregar a carrito
-  function addToCart(item) {
-    const itemExists = cart.findIndex((guitar) => guitar.id === item.id);
-    if (itemExists >= 0) {
-      //existe en el carrito
-      if(cart[itemExists].quantity >= Max_Items) return
-      const updatedCart = [...cart];
-      updatedCart[itemExists].quantity++;
-      setCart(updatedCart);
-    } else {
-      item.quantity = 1;
-      setCart([...cart, item]);
-    }
-
-  
-  }
-
-  //funcion para Incrementar cantidades en carrito
-  function increaseQuantity(id) {
-    const updatedCart = cart.map((item) => {
-      if (item.id === id && item.quantity < Max_Items) {
-        return {
-          ...item,
-          quantity: item.quantity + 1,
-        };
-      }
-      return item;
-    });
-    setCart(updatedCart);
-  }
-
-  //funcion para decrementar cantidades en carrito
-  function decreaseQuantity(id) {
-    const updateCart = cart.map((item) => {
-      if (item.id === id && item.quantity > Min_Items) {
-        return {
-          ...item,
-          quantity: item.quantity - 1,
-        };
-      }
-      return item;
-    });
-    setCart(updateCart);
-  }
-
-  //funcion para eliminar de carrito
-  function removeFromCart(id) {
-    setCart((prevCart) => prevCart.filter((guitar) => guitar.id !== id));
-  }
-
-  //funcion para Vaciar el carrito 
-  function clearCart(){
-    setCart([])
-  }
-
-
-
+  const { data,
+    cart,
+    addToCart,
+    removeFromCart,
+    decreaseQuantity,
+    increaseQuantity,
+    clearCart,
+  isEmpty,
+cartTotal} = useCart()
+ 
 
   return (
     //con esto paso las funciones a otros componentes
@@ -90,6 +29,8 @@ const initialCart = ()=>{
         increaseQuantity={increaseQuantity}
         decreaseQuantity={decreaseQuantity}
         clearCart = {clearCart}
+        isEmpty = {isEmpty}
+        cartTotal = {cartTotal}
       />
 
       <main className="container-xl mt-5">
@@ -100,7 +41,7 @@ const initialCart = ()=>{
             <Guitar
               key={guitar.id}
               guitar={guitar}
-              setCart={setCart}
+              // setCart={setCart}
               addToCart={addToCart}
             />
           ))}
